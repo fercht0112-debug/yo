@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen: El Escolta del Globo - Fernando Cruz Torres</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial Black', sans-serif;
+            background-color: #f0f0f0;
+            height: 100vh;
+            cursor: none; /* El globo reemplaza al cursor */
+        }
+
+        /* El Escoltado (Globo) */
+        #globo {
+            position: absolute;
+            font-size: 50px;
+            pointer-events: none;
+            z-index: 10;
+            transition: transform 0.05s ease-out;
+        }
+
+        /* Las Minas */
+        .mina {
+            position: absolute;
+            font-size: 45px;
+            user-select: none;
+        }
+
+        /* Zona de Meta */
+        #meta {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 110px;
+            height: 110px;
+            background-color: rgba(0, 255, 0, 0.2);
+            border: 4px dashed #27ae60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #1b5e20;
+            border-radius: 10px;
+        }
+
+        /* Pantalla de Fin de Juego (Overlay) */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        #mensaje {
+            font-size: 4rem;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
+        }
+
+        #status-gif {
+            width: 400px;
+            max-width: 85%;
+            border: 5px solid white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* Botón Reiniciar Mortal Kombat Style */
+        .btn-reiniciar {
+            margin-top: 25px;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-family: 'Arial Black', sans-serif;
+            color: white;
+            background: linear-gradient(to bottom, #8b0000, #ff0000);
+            border: 3px solid white;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+        }
+
+        .btn-reiniciar:hover {
+            transform: scale(1.1);
+            background: #ff0000;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255,255,255,0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="globo">🎈</div>
+
+    <div class="mina" style="top: 20%; left: 30%;">💣</div>
+    <div class="mina" style="top: 55%; left: 65%;">💣</div>
+    <div class="mina" style="top: 75%; left: 15%;">💣</div>
+    <div class="mina" style="top: 35%; left: 80%;">💣</div>
+
+    <div id="meta">META 🏁</div>
+
+    <div id="overlay">
+        <h1 id="mensaje"></h1>
+        <img id="status-gif" src="" alt="Resultado">
+        <button class="btn-reiniciar" onclick="location.reload()">REINTENTAR COMBATE</button>
+    </div>
+
+    <footer>Alumno: Fernando Cruz Torres</footer>
+
+    <script>
+        const globo = document.getElementById('globo');
+        const minas = document.querySelectorAll('.mina');
+        const meta = document.getElementById('meta');
+        const overlay = document.getElementById('overlay');
+        const mensaje = document.getElementById('mensaje');
+        const statusGif = document.getElementById('status-gif');
+        let juegoTerminado = false;
+
+        document.addEventListener('mousemove', (e) => {
+            if (juegoTerminado) return;
+
+            // Seguimiento Dinámico
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            globo.style.left = (x - 25) + 'px';
+            globo.style.top = (y - 25) + 'px';
+
+            // Detección de Colisión con Minas
+            minas.forEach(mina => {
+                const rect1 = globo.getBoundingClientRect();
+                const rect2 = mina.getBoundingClientRect();
+
+                if (!(rect1.right < rect2.left || 
+                      rect1.left > rect2.right || 
+                      rect1.bottom < rect2.top || 
+                      rect1.top > rect2.bottom)) {
+                    finalizarJuego(false);
+                }
+            });
+
+            // Detección de Meta
+            const rectGlobo = globo.getBoundingClientRect();
+            const rectMeta = meta.getBoundingClientRect();
+
+            if (!(rectGlobo.right < rectMeta.left || 
+                  rectGlobo.left > rectMeta.right || 
+                  rectGlobo.bottom < rectMeta.top || 
+                  rectGlobo.top > rectMeta.bottom)) {
+                finalizarJuego(true);
+            }
+        });
+
+        function finalizarJuego(ganaste) {
+            juegoTerminado = true;
+            overlay.style.display = 'flex';
+            
+            if (ganaste) {
+                overlay.style.backgroundColor = "rgba(184, 134, 11, 0.9)";
+                mensaje.innerText = "¡VICTORIA! 🏆";
+                statusGif.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueXZueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKVUn7iM8FMEU24/giphy.gif";
+            } else {
+                overlay.style.backgroundColor = "black";
+                mensaje.innerText = "FATALITY"; 
+                // GIF Mortal Kombat DEFEAT
+                statusGif.src = "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM2o0eXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueXpueCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/h5NLPVn3rg0JYI8EHI/giphy.gif";
+            }
+        }
+    </script>
+</body>
+</html>
